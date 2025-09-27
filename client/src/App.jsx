@@ -5,7 +5,38 @@ import FileGallery from './components/FileGallery.jsx';
 import StatsStrip from './components/StatsStrip.jsx';
 import { formatBytes } from './utils/format.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+function resolveApiUrl() {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  if (typeof window === 'undefined') {
+    return 'http://localhost:4000';
+  }
+
+  const { protocol, hostname, port } = window.location;
+
+  const githubDevMatch = hostname.match(/^(.*)-(\d+)\.app\.github\.dev$/);
+  if (githubDevMatch) {
+    const [, prefix, devPort] = githubDevMatch;
+    if (devPort !== '4000') {
+      return `${protocol}//${prefix}-4000.app.github.dev`;
+    }
+    return `${protocol}//${hostname}`;
+  }
+
+  if (port) {
+    const parsedPort = Number(port);
+    if (!Number.isNaN(parsedPort) && parsedPort !== 4000) {
+      return `${protocol}//${hostname}:4000`;
+    }
+    return `${protocol}//${hostname}:${port}`;
+  }
+
+  return `${protocol}//${hostname}:4000`;
+}
+
+const API_URL = resolveApiUrl();
 
 export default function App() {
   const [files, setFiles] = useState([]);

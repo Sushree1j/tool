@@ -4,13 +4,18 @@ const { ensureDir } = require('./utils/ensureDir');
 
 const dataDir = path.join(__dirname, '..', 'data');
 const dbPath = path.join(dataDir, 'fileshare.db');
+const isTest = process.env.NODE_ENV === 'test';
 
 let dbInstance;
 
 function getDb() {
   if (!dbInstance) {
-    ensureDir(dataDir);
-    dbInstance = new Database(dbPath);
+    if (isTest) {
+      dbInstance = new Database(':memory:');
+    } else {
+      ensureDir(dataDir);
+      dbInstance = new Database(dbPath);
+    }
     dbInstance.pragma('journal_mode = WAL');
     dbInstance.exec(`
       CREATE TABLE IF NOT EXISTS files (
@@ -30,7 +35,15 @@ function getDb() {
   return dbInstance;
 }
 
+function closeDb() {
+  if (dbInstance) {
+    dbInstance.close();
+    dbInstance = undefined;
+  }
+}
+
 module.exports = {
   getDb,
+  closeDb,
   dbPath
 };
