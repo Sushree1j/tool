@@ -7,7 +7,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor, ExtraTreesRegressor
+from sklearn.svm import SVR
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import xgboost as xgb
 from tensorflow import keras
@@ -190,6 +191,148 @@ class XGBoostModel(StockPredictionModel):
         return None
 
 
+class RidgeModel(StockPredictionModel):
+    """Ridge Regression model"""
+    
+    def __init__(self, alpha=1.0, model_dir='models'):
+        super().__init__(model_dir)
+        self.model = Ridge(alpha=alpha, random_state=42)
+    
+    def train(self, X_train, y_train):
+        """Train the model"""
+        print("Training Ridge Regression model...")
+        self.model.fit(X_train, y_train)
+        print("Training completed!")
+    
+    def predict(self, X):
+        """Make predictions"""
+        return self.model.predict(X)
+
+
+class LassoModel(StockPredictionModel):
+    """Lasso Regression model"""
+    
+    def __init__(self, alpha=0.1, model_dir='models'):
+        super().__init__(model_dir)
+        self.model = Lasso(alpha=alpha, random_state=42)
+    
+    def train(self, X_train, y_train):
+        """Train the model"""
+        print("Training Lasso Regression model...")
+        self.model.fit(X_train, y_train)
+        print("Training completed!")
+    
+    def predict(self, X):
+        """Make predictions"""
+        return self.model.predict(X)
+
+
+class GradientBoostingModel(StockPredictionModel):
+    """Gradient Boosting model"""
+    
+    def __init__(self, n_estimators=100, learning_rate=0.1, max_depth=5, model_dir='models'):
+        super().__init__(model_dir)
+        self.model = GradientBoostingRegressor(
+            n_estimators=n_estimators,
+            learning_rate=learning_rate,
+            max_depth=max_depth,
+            random_state=42
+        )
+    
+    def train(self, X_train, y_train):
+        """Train the model"""
+        print("Training Gradient Boosting model...")
+        self.model.fit(X_train, y_train)
+        print("Training completed!")
+    
+    def predict(self, X):
+        """Make predictions"""
+        return self.model.predict(X)
+    
+    def get_feature_importance(self):
+        """Get feature importance"""
+        if self.feature_names:
+            importance = pd.DataFrame({
+                'feature': self.feature_names,
+                'importance': self.model.feature_importances_
+            }).sort_values('importance', ascending=False)
+            return importance
+        return None
+
+
+class ExtraTreesModel(StockPredictionModel):
+    """Extra Trees model"""
+    
+    def __init__(self, n_estimators=100, max_depth=20, model_dir='models'):
+        super().__init__(model_dir)
+        self.model = ExtraTreesRegressor(
+            n_estimators=n_estimators,
+            max_depth=max_depth,
+            random_state=42,
+            n_jobs=-1
+        )
+    
+    def train(self, X_train, y_train):
+        """Train the model"""
+        print("Training Extra Trees model...")
+        self.model.fit(X_train, y_train)
+        print("Training completed!")
+    
+    def predict(self, X):
+        """Make predictions"""
+        return self.model.predict(X)
+    
+    def get_feature_importance(self):
+        """Get feature importance"""
+        if self.feature_names:
+            importance = pd.DataFrame({
+                'feature': self.feature_names,
+                'importance': self.model.feature_importances_
+            }).sort_values('importance', ascending=False)
+            return importance
+        return None
+
+
+class AdaBoostModel(StockPredictionModel):
+    """AdaBoost model"""
+    
+    def __init__(self, n_estimators=100, learning_rate=0.1, model_dir='models'):
+        super().__init__(model_dir)
+        self.model = AdaBoostRegressor(
+            n_estimators=n_estimators,
+            learning_rate=learning_rate,
+            random_state=42
+        )
+    
+    def train(self, X_train, y_train):
+        """Train the model"""
+        print("Training AdaBoost model...")
+        self.model.fit(X_train, y_train)
+        print("Training completed!")
+    
+    def predict(self, X):
+        """Make predictions"""
+        return self.model.predict(X)
+
+
+class SVRModel(StockPredictionModel):
+    """Support Vector Regression model"""
+    
+    def __init__(self, kernel='rbf', C=1.0, epsilon=0.1, model_dir='models'):
+        super().__init__(model_dir)
+        self.model = SVR(kernel=kernel, C=C, epsilon=epsilon)
+    
+    def train(self, X_train, y_train):
+        """Train the model"""
+        print("Training SVR model...")
+        self.model.fit(X_train, y_train)
+        print("Training completed!")
+    
+    def predict(self, X):
+        """Make predictions"""
+        return self.model.predict(X)
+
+
 class LSTMModel:
     """LSTM Deep Learning model"""
     
@@ -319,4 +462,5 @@ class LSTMModel:
 
 if __name__ == "__main__":
     print("Stock Prediction Models Module")
-    print("Available models: LinearRegression, RandomForest, XGBoost, LSTM")
+    print("Available models: LinearRegression, Ridge, Lasso, RandomForest, XGBoost,")
+    print("                  GradientBoosting, ExtraTrees, AdaBoost, SVR, LSTM")
