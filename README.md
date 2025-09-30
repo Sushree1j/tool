@@ -1,108 +1,97 @@
-# NovaShare
+# Stock Price Prediction Project
 
-NovaShare is a premium-styled large file sharing experience that lets you upload and distribute transfers up to **10 GB** with shareable download links. It pairs a glassmorphism React + Tailwind interface with a performant Express API, streaming uploads straight to disk and keeping metadata in SQLite.
+A comprehensive data science project for predicting stock prices using machine learning techniques.
 
 ## Features
 
-- 🚀 **Massive transfers** – upload a single file up to 10 GB with real-time progress.
-- 💎 **Premium UI** – gradient-rich, glassy interface tailored for client deliveries.
-- 🔐 **Secure by default** – AES-ready storage design, unique share codes, optional deletion.
-- 📊 **Instant insights** – track number of files and total storage consumed.
-- 🔗 **Shareable links** – one-click copy links for every upload, backed by streaming downloads.
+- **Real-time Data Collection**: Fetch historical stock data using yfinance
+- **Technical Indicators**: Calculate moving averages, RSI, MACD, Bollinger Bands
+- **Multiple ML Models**: 
+  - Linear Regression
+  - Random Forest
+  - LSTM (Deep Learning)
+  - XGBoost
+- **Visualization**: Interactive charts and prediction plots
+- **Model Evaluation**: RMSE, MAE, R² scores
 
-## Project structure
+## Project Structure
 
 ```
 .
-├── client/        # React + Vite + Tailwind front-end
-├── server/        # Express API with SQLite metadata store
-├── uploads/       # Runtime file storage (created automatically)
-└── data/          # SQLite database location (auto-created)
+├── data/                    # Store downloaded stock data
+├── models/                  # Saved trained models
+├── notebooks/              # Jupyter notebooks for exploration
+│   └── stock_analysis.ipynb
+├── src/                    # Source code
+│   ├── data_collector.py   # Fetch stock data
+│   ├── feature_engineering.py  # Create technical indicators
+│   ├── models.py           # ML model implementations
+│   ├── visualizer.py       # Plotting functions
+│   └── predictor.py        # Main prediction script
+├── requirements.txt        # Project dependencies
+└── main.py                # Run the complete pipeline
+
 ```
 
-## Prerequisites
-
-- Node.js 18+
-- npm 9+
-
-## Setup
-
-Install dependencies from the repository root:
+## Installation
 
 ```bash
-npm install
+pip install -r requirements.txt
 ```
 
-Create an environment file for the server (optional unless overriding defaults):
+## Quick Start
 
 ```bash
-cp server/.env.example server/.env
+# Predict stock prices for a specific ticker
+python main.py --ticker AAPL --days 30
+
+# Train and evaluate multiple models
+python src/predictor.py --ticker TSLA --model all
+
+# Explore data in Jupyter notebook
+jupyter notebook notebooks/stock_analysis.ipynb
 ```
 
-Adjust the values if you plan to expose the API publicly.
+## Usage Examples
 
-## Running locally
-
-Start both the API and the front-end in parallel:
-
-```bash
-npm run dev
+### Predict Apple Stock Price
+```python
+python main.py --ticker AAPL --days 30 --model lstm
 ```
 
-- Front-end: http://localhost:5173
-- API: http://localhost:4000
-
-The React client reads the API origin from `VITE_API_URL`. You can override it by creating a `client/.env` file:
-
-```
-VITE_API_URL=http://localhost:4000
+### Compare Multiple Stocks
+```python
+python main.py --ticker AAPL GOOGL MSFT --days 60
 ```
 
-## Production build
+## Models Explained
 
-Generate the static assets:
+1. **Linear Regression**: Baseline model for trend prediction
+2. **Random Forest**: Ensemble method handling non-linear relationships
+3. **LSTM**: Deep learning model capturing temporal patterns
+4. **XGBoost**: Gradient boosting for high accuracy
 
-```bash
-npm run build
-```
+## Technical Indicators Used
 
-Deploy the `client/dist` folder behind any static host and run the API with:
+- Simple Moving Average (SMA)
+- Exponential Moving Average (EMA)
+- Relative Strength Index (RSI)
+- Moving Average Convergence Divergence (MACD)
+- Bollinger Bands
+- Volume indicators
 
-```bash
-npm run start
-```
+## Disclaimer
 
-Ensure the environment variable `CLIENT_ORIGIN` is set to the domain serving the front-end.
+⚠️ **Important**: This project is for educational purposes only. Stock market predictions are inherently uncertain. Never make investment decisions based solely on these predictions. Always consult with financial advisors.
 
-## Testing
+## Future Enhancements
 
-Execute the automated tests (covers utility code and upload flow):
+- [ ] Sentiment analysis from news and social media
+- [ ] Real-time prediction dashboard
+- [ ] Portfolio optimization
+- [ ] Backtesting strategies
+- [ ] API for predictions
 
-```bash
-npm test
-```
+## License
 
-## API overview
-
-| Method | Endpoint                | Description                               |
-|--------|-------------------------|-------------------------------------------|
-| GET    | `/health`               | Health check                               |
-| GET    | `/api/files`            | List recent uploads                        |
-| POST   | `/api/files`            | Upload a file (field name: `file`)         |
-| GET    | `/api/files/:code`      | Metadata for a specific upload             |
-| GET    | `/api/files/:code/download` | Download the file associated with `code` |
-| DELETE | `/api/files/:code`      | Remove a file and its metadata             |
-
-## Security notes
-
-- Express serves downloads via streaming to avoid memory bloat. Files sit on disk inside `/uploads` with hashed filenames.
-- Share codes exclude ambiguous characters for easier verbal sharing.
-- Multer enforces a 10 GB hard cap via `LIMIT_FILE_SIZE`.
-- SQLite is initialized in Write-Ahead Logging (WAL) mode for consistency.
-
-## Next steps
-
-- Add authentication/teams for multi-user vaults.
-- Wire encryption at rest by wrapping the upload stream.
-- Enable resumable uploads with chunk orchestration for unreliable networks.
-- Plug into cloud storage (S3, Azure Blob, etc.) behind the same interface.
+MIT License
