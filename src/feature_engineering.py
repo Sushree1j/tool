@@ -223,7 +223,7 @@ class FeatureEngineer:
 
 if __name__ == "__main__":
     # Example usage
-    from data_collector import StockDataCollector
+    from .data_collector import StockDataCollector
     
     # Fetch data
     collector = StockDataCollector()

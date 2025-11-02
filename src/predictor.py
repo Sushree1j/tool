@@ -6,10 +6,10 @@ Orchestrates the entire prediction pipeline
 import argparse
 import pandas as pd
 import numpy as np
-from data_collector import StockDataCollector
-from feature_engineering import FeatureEngineer
-from models import LinearRegressionModel, RandomForestModel, XGBoostModel, LSTMModel
-from visualizer import StockVisualizer
+from .data_collector import StockDataCollector
+from .feature_engineering import FeatureEngineer
+from .models import LinearRegressionModel, RandomForestModel, XGBoostModel, LSTMModel
+from .visualizer import StockVisualizer
 import warnings
 warnings.filterwarnings('ignore')
 

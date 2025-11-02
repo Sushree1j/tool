@@ -1,0 +1,94 @@
+# Stock Price Prediction Tool - Configuration File
+
+# Data Collection Settings
+data:
+  directory: 'data'  # Directory to store downloaded stock data
+  cache_enabled: true  # Use cached data if available
+  default_period: '5y'  # Default historical data period
+  default_interval: '1d'  # Default data interval
+
+# Model Training Settings
+models:
+  # Linear Regression
+  linear_regression:
+    enabled: true
+  
+  # Random Forest
+  random_forest:
+    enabled: true
+    n_estimators: 100
+    max_depth: 15
+    random_state: 42
+  
+  # XGBoost
+  xgboost:
+    enabled: true
+    n_estimators: 100
+    learning_rate: 0.1
+    max_depth: 6
+    random_state: 42
+  
+  # LSTM (Deep Learning)
+  lstm:
+    enabled: false  # Disabled by default (requires TensorFlow)
+    sequence_length: 60
+    epochs: 50
+    batch_size: 32
+    validation_split: 0.1
+
+# Feature Engineering Settings
+features:
+  # Moving Averages
+  moving_averages:
+    windows: [5, 10, 20, 50, 200]
+  
+  # RSI
+  rsi:
+    window: 14
+  
+  # MACD
+  macd:
+    fast: 12
+    slow: 26
+    signal: 9
+  
+  # Bollinger Bands
+  bollinger_bands:
+    window: 20
+    std: 2
+  
+  # Stochastic Oscillator
+  stochastic:
+    window: 14
+    smooth: 3
+  
+  # ATR (Volatility)
+  atr:
+    window: 14
+
+# Training Settings
+training:
+  test_size: 0.2  # Proportion of data to use for testing
+  random_state: 42
+
+# Visualization Settings
+visualization:
+  figure_size: [14, 8]
+  dpi: 300
+  save_plots: false
+  plot_directory: 'plots'
+  style: 'darkgrid'  # seaborn style
+
+# Logging Settings
+logging:
+  level: 'INFO'  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file: 'stock_prediction.log'
+  console: true
+
+# Output Settings
+output:
+  save_models: false
+  model_directory: 'models'
+  save_predictions: false
+  prediction_directory: 'predictions'
