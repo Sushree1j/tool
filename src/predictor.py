@@ -1,11 +1,13 @@
 """
 Main Prediction Script
-Orchestrates the entire prediction pipeline
+Orchestrates the entire prediction pipeline with comprehensive error handling
 """
 
 import argparse
 import pandas as pd
 import numpy as np
+import logging
+from typing import Dict, Any, Optional
 from .data_collector import StockDataCollector
 from .feature_engineering import FeatureEngineer
 from .models import LinearRegressionModel, RandomForestModel, XGBoostModel, LSTMModel
@@ -13,62 +15,110 @@ from .visualizer import StockVisualizer
 import warnings
 warnings.filterwarnings('ignore')
 
+logger = logging.getLogger(__name__)
+
 
 class StockPredictor:
-    """Main class for stock price prediction"""
+    """Main class for stock price prediction with comprehensive error handling"""
     
-    def __init__(self, ticker):
+    def __init__(self, ticker: str):
         """
         Initialize predictor
         
         Args:
             ticker (str): Stock ticker symbol
+            
+        Raises:
+            ValueError: If ticker is invalid
         """
-        self.ticker = ticker
+        if not ticker or not isinstance(ticker, str):
+            raise ValueError("Ticker must be a non-empty string")
+        
+        self.ticker = ticker.strip().upper()
         self.collector = StockDataCollector()
         self.visualizer = StockVisualizer()
-        self.df = None
-        self.features_df = None
-        self.results = {}
+        self.df: Optional[pd.DataFrame] = None
+        self.features_df: Optional[pd.DataFrame] = None
+        self.feature_names: Optional[list] = None
+        self.results: Dict[str, Any] = {}
+        
+        logger.info(f"StockPredictor initialized for {self.ticker}")
     
-    def fetch_data(self, period='5y'):
-        """Fetch stock data"""
+    def fetch_data(self, period: str = '5y') -> pd.DataFrame:
+        """
+        Fetch stock data
+        
+        Args:
+            period (str): Historical data period
+            
+        Returns:
+            pd.DataFrame: Stock data
+            
+        Raises:
+            ValueError: If data fetching fails
+        """
         print(f"\n{'='*60}")
         print(f"Fetching data for {self.ticker}...")
         print(f"{'='*60}")
         
-        self.df = self.collector.load_stock_data(self.ticker, period=period)
-        
-        if self.df is None or self.df.empty:
-            raise ValueError(f"Failed to fetch data for {self.ticker}")
-        
-        print(f"Data fetched: {len(self.df)} rows")
-        
-        # Get stock info
-        info = self.collector.get_stock_info(self.ticker)
-        if info:
-            print(f"\nStock Information:")
-            print(f"  Name: {info['name']}")
-            print(f"  Sector: {info['sector']}")
-            print(f"  Current Price: ${info['current_price']}")
-        
-        return self.df
+        try:
+            self.df = self.collector.load_stock_data(self.ticker, period=period)
+            
+            if self.df is None or self.df.empty:
+                raise ValueError(f"Failed to fetch data for {self.ticker}")
+            
+            print(f"✓ Data fetched: {len(self.df)} rows")
+            
+            # Get and display stock info
+            try:
+                info = self.collector.get_stock_info(self.ticker)
+                if info:
+                    print(f"\n📊 Stock Information:")
+                    print(f"  Name: {info['name']}")
+                    print(f"  Sector: {info['sector']}")
+                    if info['current_price'] != 'N/A':
+                        print(f"  Current Price: ${info['current_price']}")
+            except Exception as e:
+                logger.debug(f"Could not fetch stock info: {e}")
+            
+            return self.df
+            
+        except Exception as e:
+            logger.error(f"Error fetching data for {self.ticker}: {e}")
+            raise ValueError(f"Failed to fetch data for {self.ticker}: {e}")
     
-    def engineer_features(self):
-        """Create technical indicators"""
+    def engineer_features(self) -> pd.DataFrame:
+        """
+        Create technical indicators
+        
+        Returns:
+            pd.DataFrame: Features dataframe
+            
+        Raises:
+            RuntimeError: If feature engineering fails
+            ValueError: If data hasn't been fetched
+        """
+        if self.df is None or self.df.empty:
+            raise ValueError("No data available. Call fetch_data() first.")
+        
         print(f"\n{'='*60}")
         print("Engineering features...")
         print(f"{'='*60}")
         
-        engineer = FeatureEngineer(self.df)
-        engineer.add_all_features()
-        self.features_df = engineer.get_feature_dataframe()
-        self.feature_names = engineer.get_feature_names()
-        
-        print(f"Features created: {len(self.feature_names)}")
-        print(f"Final dataset: {self.features_df.shape}")
-        
-        return self.features_df
+        try:
+            engineer = FeatureEngineer(self.df)
+            engineer.add_all_features(show_progress=True)
+            self.features_df = engineer.get_feature_dataframe()
+            self.feature_names = engineer.get_feature_names()
+            
+            print(f"\n✓ Features created: {len(self.feature_names)}")
+            print(f"✓ Final dataset: {self.features_df.shape[0]} rows × {self.features_df.shape[1]} columns")
+            
+            return self.features_df
+            
+        except Exception as e:
+            logger.error(f"Error engineering features: {e}")
+            raise RuntimeError(f"Feature engineering failed: {e}")
     
     def train_linear_regression(self):
         """Train Linear Regression model"""

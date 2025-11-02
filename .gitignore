@@ -7,6 +7,8 @@ __pycache__/
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 build/
 develop-eggs/
 dist/
@@ -22,23 +24,27 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb_checkpoints
 
-# Data
+# Data files
 data/
 *.csv
 *.h5
 *.hdf5
 
-# Models
+# Model files
 models/
 *.pkl
+*.pickle
 *.h5
 *.json
 *.pb
+saved_model/
+checkpoints/
 
 # IDE
 .vscode/
@@ -46,13 +52,53 @@ models/
 *.swp
 *.swo
 *~
+.vscode/
+.history/
 
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # Logs
 *.log
+logs/
+*.log.*
 
 # Environment
 .env
+.venv
+env/
+venv/
+
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Plots and outputs
+plots/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+predictions/
+results/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+tmp/
+temp/
+
+# Documentation build
+docs/_build/
+site/
+
+# Distribution
+*.tar.gz
+*.zip
