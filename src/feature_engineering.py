@@ -5,23 +5,44 @@ Creates technical indicators and features for stock prediction
 
 import pandas as pd
 import numpy as np
+from typing import List, Optional
+import logging
+
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+    
 from ta.trend import SMAIndicator, EMAIndicator, MACD
 from ta.momentum import RSIIndicator, StochasticOscillator
 from ta.volatility import BollingerBands, AverageTrueRange
 from ta.volume import OnBalanceVolumeIndicator
 
+logger = logging.getLogger(__name__)
+
 
 class FeatureEngineer:
     """Create technical indicators and features from stock data"""
     
-    def __init__(self, df):
+    def __init__(self, df: pd.DataFrame):
         """
         Initialize feature engineer
         
         Args:
             df (pd.DataFrame): Stock data with OHLCV columns
         """
+        if df is None or df.empty:
+            raise ValueError("DataFrame cannot be None or empty")
+        
+        required_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        
+        if missing_columns:
+            raise ValueError(f"Missing required columns: {', '.join(missing_columns)}")
+        
         self.df = df.copy()
+        logger.info(f"FeatureEngineer initialized with {len(df)} rows")
     
     def add_moving_averages(self, windows=[5, 10, 20, 50, 200]):
         """
@@ -177,25 +198,59 @@ class FeatureEngineer:
         
         return self
     
-    def add_all_features(self):
-        """Add all technical indicators"""
-        print("Adding technical indicators...")
+    def add_all_features(self, show_progress: bool = True) -> 'FeatureEngineer':
+        """
+        Add all technical indicators
         
-        self.add_moving_averages()
-        self.add_rsi()
-        self.add_macd()
-        self.add_bollinger_bands()
-        self.add_stochastic()
-        self.add_atr()
-        self.add_obv()
-        self.add_price_changes()
-        self.add_volume_features()
-        self.add_target_variable()
+        Args:
+            show_progress (bool): Show progress bar
+            
+        Returns:
+            FeatureEngineer: Self for method chaining
+        """
+        logger.info("Adding technical indicators...")
+        
+        # Define all feature addition steps
+        steps = [
+            ("Moving Averages", self.add_moving_averages),
+            ("RSI", self.add_rsi),
+            ("MACD", self.add_macd),
+            ("Bollinger Bands", self.add_bollinger_bands),
+            ("Stochastic Oscillator", self.add_stochastic),
+            ("ATR", self.add_atr),
+            ("OBV", self.add_obv),
+            ("Price Changes", self.add_price_changes),
+            ("Volume Features", self.add_volume_features),
+            ("Target Variable", self.add_target_variable),
+        ]
+        
+        # Use tqdm if available and requested
+        if TQDM_AVAILABLE and show_progress:
+            iterator = tqdm(steps, desc="Creating features", unit="indicator")
+        else:
+            iterator = steps
+        
+        # Execute each step
+        for step_name, step_func in iterator:
+            try:
+                if not TQDM_AVAILABLE:
+                    print(f"  Adding {step_name}...")
+                step_func()
+            except Exception as e:
+                logger.error(f"Error adding {step_name}: {e}")
+                raise
         
         # Remove NaN values
         initial_rows = len(self.df)
         self.df = self.df.dropna()
-        print(f"Removed {initial_rows - len(self.df)} rows with NaN values")
+        removed_rows = initial_rows - len(self.df)
+        
+        logger.info(f"Removed {removed_rows} rows with NaN values")
+        logger.info(f"Final dataset: {len(self.df)} rows, {len(self.df.columns)} columns")
+        
+        if not TQDM_AVAILABLE and show_progress:
+            print(f"✓ Features created: {len(self.df.columns)} total columns")
+            print(f"✓ Removed {removed_rows} rows with NaN values")
         
         return self
     
