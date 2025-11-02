@@ -236,7 +236,6 @@ def main():
     
     # Load configuration
     try:
-        from src.config import get_config
         config = get_config(args.config)
         logger.info(f"Configuration loaded from {args.config}")
     except Exception as e:
@@ -300,7 +299,8 @@ def main():
         sys.exit(0)
 
 
-if __name__ == "__main__":
+def cli_entry():
+    """CLI entry point for console script"""
     try:
         main()
     except KeyboardInterrupt:
@@ -312,3 +312,7 @@ if __name__ == "__main__":
         print("\nFor help, run: python main.py --help")
         print("For bugs, please report at: https://github.com/Sushree1j/tool/issues")
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    cli_entry()

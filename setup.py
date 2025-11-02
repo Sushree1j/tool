@@ -57,7 +57,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'stock-predict=main:main',
+            'stock-predict=main:cli_entry',
         ],
     },
     classifiers=[

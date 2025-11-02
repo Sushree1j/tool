@@ -278,7 +278,16 @@ class FeatureEngineer:
 
 if __name__ == "__main__":
     # Example usage
-    from .data_collector import StockDataCollector
+    import sys
+    import os
+    
+    # Add parent directory to path for direct execution
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    try:
+        from src.data_collector import StockDataCollector
+    except ImportError:
+        from data_collector import StockDataCollector
     
     # Fetch data
     collector = StockDataCollector()
